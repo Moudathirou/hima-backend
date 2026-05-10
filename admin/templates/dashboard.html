@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Tableau de bord — Admin{% endblock %}
+{% block content %}
+
+<h1>Tableau de bord</h1>
+
+{% if active_summary %}
+<div class="card" style="border-left:4px solid #2E7D32">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+    <div>
+      <div style="color:#6B6B6B;font-size:12px;letter-spacing:1px;text-transform:uppercase">Campagne en cours</div>
+      <h2 style="margin:4px 0">{{ active_summary.campaign.name }}</h2>
+      <div style="color:#6B6B6B">{{ active_summary.nb_distributions }} distributions effectuées</div>
+    </div>
+    <a href="/admin/campaigns/{{ active_summary.campaign.id }}" class="btn btn-primary">Gérer la campagne</a>
+  </div>
+  {% if active_summary.stocks %}
+  <table style="margin-top:12px">
+    <thead><tr><th>Item</th><th>Alloué</th><th>Distribué</th><th>Restant</th></tr></thead>
+    <tbody>
+      {% for s in active_summary.stocks %}
+      {% set restant = s.quantite_initiale - s.quantite_distribuee %}
+      <tr>
+        <td>{{ s.item_name }}</td>
+        <td>{{ s.quantite_initiale }}</td>
+        <td>{{ s.quantite_distribuee }}</td>
+        <td><strong style="color:{{ '#B71C1C' if restant <= 0 else '#2E7D32' }}">{{ restant }}</strong></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+{% else %}
+<div class="card" style="border-left:4px solid #B71C1C">
+  <h2 style="margin:0 0 4px 0">Aucune campagne active</h2>
+  <p style="color:#6B6B6B;margin:0 0 12px 0">
+    Les agents terrain ne peuvent pas effectuer de distribution tant qu'aucune campagne n'est lancée.
+  </p>
+  <a href="/admin/campaigns" class="btn btn-primary">Lancer une campagne</a>
+</div>
+{% endif %}
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-value">{{ stats.nb_foyers }}</div>
+    <div class="stat-label">Foyers recensés</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">{{ stats.nb_beneficiaires }}</div>
+    <div class="stat-label">Individus recensés</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">{{ stats.distributions_ce_mois }}</div>
+    <div class="stat-label">Distributions ce mois</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">{{ stats.nb_agents_actifs }}</div>
+    <div class="stat-label">Agents actifs</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">{{ "%.0f"|format(stats.dons_total) }}</div>
+    <div class="stat-label">Dons total (KMF)</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">{{ "%.0f"|format(stats.cotisations_total) }}</div>
+    <div class="stat-label">Cotisations (KMF)</div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Répartition par île</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Île</th>
+        <th>Foyers</th>
+        <th>Distributions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in island_stats %}
+      <tr>
+        <td>
+          {% if row.island == 'grande_comore' %}Grande Comore (Ngazidja)
+          {% elif row.island == 'anjouan' %}Anjouan (Ndzuani)
+          {% elif row.island == 'moheli' %}Mohéli (Mwali)
+          {% else %}{{ row.island }}{% endif %}
+        </td>
+        <td>{{ row.nb_foyers }}</td>
+        <td>{{ row.nb_distributions }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

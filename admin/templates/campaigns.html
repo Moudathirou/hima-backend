@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Campagnes — Admin{% endblock %}
+{% block content %}
+
+<h1>Campagnes de distribution</h1>
+
+{% if success %}<div class="alert alert-success">{{ success }}</div>{% endif %}
+{% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+
+{% set active_count = campaigns|selectattr("status","equalto","active")|list|length %}
+
+<div class="card">
+  <h2>Lancer une nouvelle campagne</h2>
+  {% if active_count > 0 %}
+    <p style="color:#B71C1C">
+      Une campagne est déjà en cours. Terminez-la avant d'en lancer une nouvelle.
+    </p>
+  {% else %}
+    <form method="post" action="/admin/campaigns/create">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="name">Nom de la campagne</label>
+          <input type="text" id="name" name="name" placeholder="Ex: Fournitures scolaires Avril 2026" required>
+        </div>
+        <div class="form-group">
+          <label for="type">Type</label>
+          <select id="type" name="type" required>
+            {% for value, label in campaign_types %}
+              <option value="{{ value }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">Lancer la campagne</button>
+    </form>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2>Toutes les campagnes ({{ campaigns|length }})</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Nom</th>
+        <th>Type</th>
+        <th>Statut</th>
+        <th>Lancée le</th>
+        <th>Clôturée le</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in campaigns %}
+      <tr>
+        <td><strong>{{ c.name }}</strong></td>
+        <td>{{ type_label(c.type) }}</td>
+        <td>
+          <span class="badge badge-{{ 'active' if c.status == 'active' else 'inactive' }}">
+            {{ 'En cours' if c.status == 'active' else 'Terminée' }}
+          </span>
+        </td>
+        <td>{{ c.created_at.strftime('%Y-%m-%d %H:%M') if c.created_at else '—' }}</td>
+        <td>{{ c.closed_at.strftime('%Y-%m-%d %H:%M') if c.closed_at else '—' }}</td>
+        <td>
+          <a href="/admin/campaigns/{{ c.id }}" class="btn btn-sm">Détails</a>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6" style="text-align:center;color:#9E9E9E">Aucune campagne pour le moment.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

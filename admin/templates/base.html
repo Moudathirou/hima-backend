@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Hima Chababi — Admin{% endblock %}</title>
+  <link rel="stylesheet" href="/admin/static/admin.css">
+</head>
+<body>
+  {% if session_agent %}
+  <nav class="navbar">
+    <div class="navbar-brand">
+      هيما شبابي <span>Administration</span>
+    </div>
+    <div class="navbar-links">
+      <a href="/admin/dashboard">Tableau de bord</a>
+      <a href="/admin/campaigns">Campagnes</a>
+      <a href="/admin/agents">Agents</a>
+      <span style="color:rgba(255,255,255,0.5)">|</span>
+      <span style="color:rgba(255,255,255,0.7);font-size:13px">{{ session_agent.full_name }}</span>
+      <form method="post" action="/admin/logout" style="margin:0">
+        <button type="submit" class="btn-logout">Déconnexion</button>
+      </form>
+    </div>
+  </nav>
+  {% endif %}
+
+  <div class="container">
+    {% block content %}{% endblock %}
+  </div>
+</body>
+</html>

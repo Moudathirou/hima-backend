@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}Gestion des agents — Admin{% endblock %}
+{% block content %}
+
+<h1>Gestion des agents</h1>
+
+{% if success %}
+<div class="alert alert-success">{{ success }}</div>
+{% endif %}
+{% if error %}
+<div class="alert alert-error">{{ error }}</div>
+{% endif %}
+
+<!-- Formulaire de création -->
+<div class="card">
+  <h2>Créer un nouveau compte agent</h2>
+  <form method="post" action="/admin/agents/create">
+    <div class="form-row">
+      <div class="form-group">
+        <label for="username">Nom d'utilisateur</label>
+        <input type="text" id="username" name="username" placeholder="ahmed.m" required>
+      </div>
+      <div class="form-group">
+        <label for="full_name">Nom complet</label>
+        <input type="text" id="full_name" name="full_name" placeholder="Ahmed Mohamed" required>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="password">Mot de passe</label>
+        <input type="password" id="password" name="password" placeholder="Mot de passe sécurisé" required>
+      </div>
+      <div class="form-group">
+        <label for="island">Île</label>
+        <select id="island" name="island">
+          <option value="">— Sélectionner —</option>
+          <option value="grande_comore">Grande Comore (Ngazidja)</option>
+          <option value="anjouan">Anjouan (Ndzuani)</option>
+          <option value="moheli">Mohéli (Mwali)</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="village">Village</label>
+      <input type="text" id="village" name="village" placeholder="Village ou zone d'intervention">
+    </div>
+    <button type="submit" class="btn btn-primary">Créer le compte agent</button>
+  </form>
+</div>
+
+<!-- Liste des agents -->
+<div class="card">
+  <h2>Agents enregistrés ({{ agents|length }})</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Nom complet</th>
+        <th>Identifiant</th>
+        <th>Rôle</th>
+        <th>Île</th>
+        <th>Village</th>
+        <th>Statut</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for agent in agents %}
+      <tr>
+        <td><strong>{{ agent.full_name }}</strong></td>
+        <td style="color:#6B6B6B">{{ agent.username }}</td>
+        <td>
+          <span class="badge badge-{{ agent.role }}">{{ agent.role }}</span>
+        </td>
+        <td class="island-label">
+          {% if agent.island == 'grande_comore' %}Grande Comore
+          {% elif agent.island == 'anjouan' %}Anjouan
+          {% elif agent.island == 'moheli' %}Mohéli
+          {% else %}—{% endif %}
+        </td>
+        <td>{{ agent.village or '—' }}</td>
+        <td>
+          <span class="badge badge-{{ 'active' if agent.is_active else 'inactive' }}">
+            {{ 'Actif' if agent.is_active else 'Inactif' }}
+          </span>
+        </td>
+        <td>
+          {% if agent.id != session_agent.id %}
+            {% if agent.is_active %}
+            <form method="post" action="/admin/agents/{{ agent.id }}/deactivate" style="display:inline">
+              <button type="submit" class="btn btn-sm btn-danger">Désactiver</button>
+            </form>
+            {% else %}
+            <form method="post" action="/admin/agents/{{ agent.id }}/activate" style="display:inline">
+              <button type="submit" class="btn btn-sm btn-success">Réactiver</button>
+            </form>
+            {% endif %}
+          {% else %}
+            <span style="color:#9E9E9E;font-size:12px">Vous</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}
